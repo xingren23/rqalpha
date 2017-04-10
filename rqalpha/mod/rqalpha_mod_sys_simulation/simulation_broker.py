@@ -24,7 +24,7 @@ from rqalpha.environment import Environment
 from rqalpha.model.order import Order
 
 from .matcher import Matcher
-from .utils import init_portfolio
+from .utils import init_portfolio, init_portfolio2
 
 
 class SimulationBroker(AbstractBroker, Persistable):
@@ -50,7 +50,7 @@ class SimulationBroker(AbstractBroker, Persistable):
         self._env.event_bus.add_listener(EVENT.AFTER_TRADING, self.after_trading)
 
     def get_portfolio(self):
-        return init_portfolio(self._env)
+        return init_portfolio2(self._env)
 
     def get_open_orders(self, order_book_id=None):
         if order_book_id is None:
@@ -69,16 +69,16 @@ class SimulationBroker(AbstractBroker, Persistable):
         for v in value['open_orders']:
             o = Order()
             o.set_state(v)
-            account = self._env.get_account(o.order_book_id)
+            account = self._env.get_account(o.order_book_id, o.account_id)
             self._open_orders.append((account, o))
         for v in value['delayed_orders']:
             o = Order()
             o.set_state(v)
-            account = self._env.get_account(o.order_book_id)
+            account = self._env.get_account(o.order_book_id, o.account_id)
             self._delayed_orders.append((account, o))
 
     def submit_order(self, order):
-        account = Environment.get_instance().get_account(order.order_book_id)
+        account = Environment.get_instance().get_account(order.order_book_id, order.account_id)
         self._env.event_bus.publish_event(Event(EVENT.ORDER_PENDING_NEW, account=account, order=order))
         if order.is_final():
             return
@@ -92,7 +92,7 @@ class SimulationBroker(AbstractBroker, Persistable):
             self._match()
 
     def cancel_order(self, order):
-        account = Environment.get_instance().get_account(order.order_book_id)
+        account = Environment.get_instance().get_account(order.order_book_id, order.account_id)
 
         self._env.event_bus.publish_event(Event(EVENT.ORDER_PENDING_CANCEL, account=account, order=order))
 

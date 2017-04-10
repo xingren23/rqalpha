@@ -52,6 +52,15 @@ class RqAttrDict(object):
         for k, v in list(six.iteritems(self.__dict__)):
             if isinstance(v, dict):
                 self.__dict__[k] = RqAttrDict(v)
+            elif isinstance(v, list):
+                items = []
+                for item in v:
+                    if isinstance(item, dict):
+                        items.append(RqAttrDict(item))
+                    else:
+                        items.append(item)
+                self.__dict__[k] = items
+
 
     def __repr__(self):
         return pprint.pformat(self.__dict__)

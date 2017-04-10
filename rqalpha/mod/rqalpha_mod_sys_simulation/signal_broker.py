@@ -41,7 +41,7 @@ class SignalBroker(AbstractBroker):
         return []
 
     def submit_order(self, order):
-        account = Environment.get_instance().get_account(order.order_book_id)
+        account = Environment.get_instance().get_account(order.order_book_id, order.account_id)
         self._env.event_bus.publish_event(Event(EVENT.ORDER_PENDING_NEW, account=account, order=order))
         if order.is_final():
             return

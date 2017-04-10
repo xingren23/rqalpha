@@ -31,6 +31,7 @@ class Order(object):
     __repr__ = property_repr
 
     def __init__(self):
+        self._account_id = None
         self._order_id = None
         self._calendar_dt = None
         self._trading_dt = None
@@ -88,8 +89,9 @@ class Order(object):
         self._type = self._str_to_enum(ORDER_TYPE, d['type'])
 
     @classmethod
-    def __from_create__(cls, calendar_dt, trading_dt, order_book_id, quantity, side, style, position_effect):
+    def __from_create__(cls, calendar_dt, trading_dt, order_book_id, quantity, side, style, position_effect, account_id=None):
         order = cls()
+        order._account_id = account_id
         order._order_id = next(order.order_id_gen)
         order._calendar_dt = calendar_dt
         order._trading_dt = trading_dt
@@ -110,6 +112,13 @@ class Order(object):
         order._transaction_cost = 0
         return order
 
+    @property
+    def account_id(self):
+        """
+        [str] 账号id
+        :return:
+        """
+        return self._account_id
     @property
     def order_id(self):
         """

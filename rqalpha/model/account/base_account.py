@@ -18,13 +18,14 @@ import six
 
 
 class BaseAccount(object):
-    def __init__(self, total_cash, positions, backward_trade_set=set(), register_event=True):
+    def __init__(self, total_cash, positions, backward_trade_set=set(), register_event=True, account_id=None):
         self._positions = positions
         self._frozen_cash = 0
         self._total_cash = total_cash
         self._backward_trade_set = backward_trade_set
         if register_event:
             self.register_event()
+        self._account_id = account_id
 
     def register_event(self):
         """
@@ -39,6 +40,10 @@ class BaseAccount(object):
         :param trades: 交易列表，基于Trades 将当前Positions ==> 最新Positions
         """
         raise NotImplementedError
+
+    @property
+    def account_id(self):
+        return self._account_id
 
     @property
     def type(self):

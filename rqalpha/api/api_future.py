@@ -54,7 +54,7 @@ def export_as_api(func):
              verify_that('side').is_in([SIDE.BUY, SIDE.SELL]),
              verify_that('position_effect').is_in([POSITION_EFFECT.OPEN, POSITION_EFFECT.CLOSE]),
              verify_that('style').is_instance_of((LimitOrder, MarketOrder)))
-def order(id_or_ins, amount, side, position_effect, style):
+def order(id_or_ins, amount, side, position_effect, style, account_id=None):
     if not isinstance(style, OrderStyle):
         raise RuntimeError
     if amount <= 0:
@@ -68,7 +68,7 @@ def order(id_or_ins, amount, side, position_effect, style):
     amount = int(amount)
 
     r_order = Order.__from_create__(env.calendar_dt, env.trading_dt, order_book_id, amount, side, style,
-                                    position_effect)
+                                    position_effect, account_id)
 
     if np.isnan(price) or price == 0:
         user_system_log.warn(
@@ -86,7 +86,7 @@ def order(id_or_ins, amount, side, position_effect, style):
 
 
 @export_as_api
-def buy_open(id_or_ins, amount, style=MarketOrder()):
+def buy_open(id_or_ins, amount, style=MarketOrder(), account_id=None):
     """
     买入开仓。
 
@@ -107,11 +107,11 @@ def buy_open(id_or_ins, amount, style=MarketOrder()):
         #以价格为3500的限价单开仓买入2张上期所AG1607合约：
         buy_open('AG1607', amount=2, style=LimitOrder(3500))
     """
-    return order(id_or_ins, amount, SIDE.BUY, POSITION_EFFECT.OPEN, style)
+    return order(id_or_ins, amount, SIDE.BUY, POSITION_EFFECT.OPEN, style, account_id)
 
 
 @export_as_api
-def buy_close(id_or_ins, amount, style=MarketOrder()):
+def buy_close(id_or_ins, amount, style=MarketOrder(), account_id=None):
     """
     平卖仓
 
@@ -132,11 +132,11 @@ def buy_close(id_or_ins, amount, style=MarketOrder()):
         #市价单将现有IF1603空仓买入平仓2张：
         buy_close('IF1603', 2)
     """
-    return order(id_or_ins, amount, SIDE.BUY, POSITION_EFFECT.CLOSE, style)
+    return order(id_or_ins, amount, SIDE.BUY, POSITION_EFFECT.CLOSE, style, account_id)
 
 
 @export_as_api
-def sell_open(id_or_ins, amount, style=MarketOrder()):
+def sell_open(id_or_ins, amount, style=MarketOrder(), account_id=None):
     """
     卖出开仓
 
@@ -150,11 +150,11 @@ def sell_open(id_or_ins, amount, style=MarketOrder()):
 
     :return: :class:`~Order` object
     """
-    return order(id_or_ins, amount, SIDE.SELL, POSITION_EFFECT.OPEN, style)
+    return order(id_or_ins, amount, SIDE.SELL, POSITION_EFFECT.OPEN, style, account_id)
 
 
 @export_as_api
-def sell_close(id_or_ins, amount, style=MarketOrder()):
+def sell_close(id_or_ins, amount, style=MarketOrder(), account_id=None):
     """
     平买仓
 
@@ -168,7 +168,7 @@ def sell_close(id_or_ins, amount, style=MarketOrder()):
 
     :return: :class:`~Order` object
     """
-    return order(id_or_ins, amount, SIDE.SELL, POSITION_EFFECT.CLOSE, style)
+    return order(id_or_ins, amount, SIDE.SELL, POSITION_EFFECT.CLOSE, style,account_id)
 
 
 def assure_future_order_book_id(id_or_symbols):

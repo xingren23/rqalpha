@@ -1,5 +1,4 @@
 from rqalpha.api import *
-
 import talib
 
 
@@ -16,6 +15,8 @@ def init(context):
     context.HIGH_RSI = 75
     context.LOW_RSI = 35
     context.ORDER_PERCENT = 0.3
+
+
 
 
 # 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
@@ -36,19 +37,20 @@ def handle_bar(context, bar_dict):
 
         # 用Talib计算RSI值
         rsi_data = talib.RSI(prices, timeperiod=context.TIME_PERIOD)[-1]
-
-        cur_position = context.portfolio.positions[stock].quantity
+        account_id = 'account1'
+        account = context.portfolio.accounts[account_id]
+        cur_position = account.positions[stock].quantity
         # 用剩余现金的30%来购买新的股票
         target_available_cash = context.portfolio.cash * context.ORDER_PERCENT
 
         # 当RSI大于设置的上限阀值，清仓该股票
         if rsi_data > context.HIGH_RSI and cur_position > 0:
             print context.now, " sell ", stock
-            order_target_value(stock, 0)
+            order_target_value(stock, 0, account_id=account_id)
 
         # 当RSI小于设置的下限阀值，用剩余cash的一定比例补仓该股
         if rsi_data < context.LOW_RSI and cur_position == 0:
             logger.info("target available cash caled: " + str(target_available_cash))
             # 如果剩余的现金不够一手 - 100shares，那么会被ricequant 的order management system reject掉
             print context.now, " buy ", stock, " value ", target_available_cash
-            order_value(stock, target_available_cash)
+            order_value(stock, target_available_cash, account_id=account_id)

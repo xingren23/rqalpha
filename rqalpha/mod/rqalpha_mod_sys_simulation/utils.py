@@ -37,3 +37,24 @@ def init_portfolio(env):
         else:
             raise NotImplementedError
     return Portfolio(start_date, 1, total_cash, accounts)
+
+
+def init_portfolio2(env):
+    accounts = {}
+    config = env.config
+    start_date = config.base.start_date
+    total_cash = 0
+    for account in config.account:
+        if ACCOUNT_TYPE[account.account_type.upper()] == ACCOUNT_TYPE.STOCK:
+            stock_starting_cash = account.starting_cash
+            accounts[account.account_id] = StockAccount(stock_starting_cash, Positions(StockPosition),
+                                                        account_id=account.account_id)
+            total_cash += stock_starting_cash
+        elif ACCOUNT_TYPE[account.account_type.upper()] == ACCOUNT_TYPE.FUTURE:
+            future_starting_cash = account.starting_cash
+            accounts[account.account_id] = FutureAccount(future_starting_cash, Positions(FuturePosition),
+                                                          account_id=account.account_id)
+            total_cash += future_starting_cash
+        else:
+            raise NotImplementedError
+    return Portfolio(start_date, 1, total_cash, accounts)

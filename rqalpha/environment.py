@@ -86,14 +86,14 @@ class Environment(object):
         self._frontend_validators.append(validator)
 
     def can_submit_order(self, order):
-        account = self.get_account(order.order_book_id)
+        account = self.get_account(order.order_book_id, order.account_id)
         for v in self._frontend_validators:
             if not v.can_submit_order(account, order):
                 return False
         return True
 
     def can_cancel_order(self, order):
-        account = self.get_account(order.order_book_id)
+        account = self.get_account(order.order_book_id, order.account_id)
         for v in self._frontend_validators:
             if not v.can_cancel_order(account, order):
                 return False
@@ -139,9 +139,13 @@ class Environment(object):
     def get_future_info(self, order_book_id, hedge_type):
         return self.data_proxy.get_future_info(order_book_id, hedge_type)
 
-    def get_account(self, order_book_id):
-        account_type = get_account_type(order_book_id)
-        return self.portfolio.accounts[account_type]
+    # todo wangzg add account_id
+    def get_account(self, order_book_id, account_id=None):
+        if account_id:
+            return self.portfolio.accounts[account_id]
+        else:
+            account_type = get_account_type(order_book_id)
+            return self.portfolio.accounts[account_type]
 
     def get_open_orders(self, order_book_id=None):
         return self.broker.get_open_orders(order_book_id)
