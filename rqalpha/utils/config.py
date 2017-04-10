@@ -20,9 +20,9 @@ import ruamel.yaml as yaml
 import datetime
 import logbook
 import locale
-from pprint import pformat
 import codecs
 import shutil
+from pprint import pformat
 
 from . import RqAttrDict, logger
 from .exception import patch_user_exc
@@ -48,6 +48,17 @@ def load_config(config_path, loader=yaml.Loader):
 def dump_config(config_path, config, dumper=yaml.RoundTripDumper):
     with codecs.open(config_path, mode='w', encoding='utf-8') as stream:
         stream.write(to_utf8(yaml.dump(config, Dumper=dumper)))
+
+
+def load_mod_config(config_path, loader=yaml.Loader):
+    mod_config = load_config(config_path, loader)
+    if mod_config is None or "mod" not in mod_config:
+        import os
+        os.remove(config_path)
+        config_path = get_mod_config_path()
+        return load_mod_config(config_path, loader)
+    else:
+        return mod_config
 
 
 def get_mod_config_path(generate=False):
@@ -195,17 +206,17 @@ def parse_config(config_args, config_path=None, click_type=True, source_code=Non
 
     if extra_config.context_vars:
         import simplejson as json
-        if isinstance(extra_config.context_vars,  six.string_types):
+        if isinstance(extra_config.context_vars, six.string_types):
             extra_config.context_vars = json.loads(to_utf8(extra_config.context_vars))
 
     if base_config.stock_starting_cash < 0:
-        raise patch_user_exc(ValueError(_('invalid stock starting cash: {}').format(base_config.stock_starting_cash)))
+        raise patch_user_exc(ValueError(_(u"invalid stock starting cash: {}").format(base_config.stock_starting_cash)))
 
     if base_config.future_starting_cash < 0:
-        raise patch_user_exc(ValueError(_('invalid future starting cash: {}').format(base_config.future_starting_cash)))
+        raise patch_user_exc(ValueError(_(u"invalid future starting cash: {}").format(base_config.future_starting_cash)))
 
     if base_config.stock_starting_cash + base_config.future_starting_cash == 0:
-        raise patch_user_exc(ValueError(_('stock starting cash and future starting cash can not be both 0.')))
+        raise patch_user_exc(ValueError(_(u"stock starting cash and future starting cash can not be both 0.")))
 
     system_log.level = getattr(logbook, extra_config.log_level.upper(), logbook.NOTSET)
     std_log.level = getattr(logbook, extra_config.log_level.upper(), logbook.NOTSET)
@@ -239,7 +250,7 @@ def parse_user_config_from_code(config, source_code=None):
             deep_update(sub_dict, config[sub_key])
 
     except Exception as e:
-        system_log.error(_('in parse_user_config, exception: {e}').format(e=e))
+        system_log.error(_(u"in parse_user_config, exception: {e}").format(e=e))
     finally:
         return config
 
@@ -272,4 +283,4 @@ def parse_persist_mode(persist_mode):
     elif persist_mode == 'on_crash':
         return PERSIST_MODE.ON_CRASH
     else:
-        raise RuntimeError(_('unknown persist mode: {persist_mode}').format(persist_mode=persist_mode))
+        raise RuntimeError(_(u"unknown persist mode: {persist_mode}").format(persist_mode=persist_mode))
