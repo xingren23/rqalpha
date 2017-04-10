@@ -250,7 +250,10 @@ class AnalyserMod(AbstractMod):
             result_dict["plots"] = df
 
         for account_type, account in six.iteritems(self._env.portfolio.accounts):
-            account_name = account_type.name.lower()
+            if isinstance(account_type, ACCOUNT_TYPE):
+                account_name = account_type.name.lower()
+            else:
+                account_name = account_type
             portfolios_list = self._sub_accounts[account_type]
             df = pd.DataFrame(portfolios_list)
             df["date"] = pd.to_datetime(df["date"])

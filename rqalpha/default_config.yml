@@ -61,6 +61,6 @@ account:
   - account_id: account1
     starting_cash: 1000000
     account_type: stock
-  - account_id: account2
-    starting_cash: 1000000
-    account_type: stock
+#  - account_id: account2
+#    starting_cash: 1000000
+#    account_type: stock
