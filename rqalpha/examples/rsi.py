@@ -7,14 +7,14 @@ import talib
 def init(context):
 
     # 选择我们感兴趣的股票
-    context.s1 = "000001.XSHE"
-    context.s2 = "601988.XSHG"
-    context.s3 = "000068.XSHE"
+    context.s1 = "510300.XSHG"
+    context.s2 = "510050.XSHG"
+    context.s3 = "159915.XSHE"
     context.stocks = [context.s1, context.s2, context.s3]
 
     context.TIME_PERIOD = 14
-    context.HIGH_RSI = 85
-    context.LOW_RSI = 30
+    context.HIGH_RSI = 75
+    context.LOW_RSI = 35
     context.ORDER_PERCENT = 0.3
 
 
@@ -43,10 +43,12 @@ def handle_bar(context, bar_dict):
 
         # 当RSI大于设置的上限阀值，清仓该股票
         if rsi_data > context.HIGH_RSI and cur_position > 0:
+            print context.now, " sell ", stock
             order_target_value(stock, 0)
 
         # 当RSI小于设置的下限阀值，用剩余cash的一定比例补仓该股
-        if rsi_data < context.LOW_RSI:
+        if rsi_data < context.LOW_RSI and cur_position == 0:
             logger.info("target available cash caled: " + str(target_available_cash))
             # 如果剩余的现金不够一手 - 100shares，那么会被ricequant 的order management system reject掉
+            print context.now, " buy ", stock, " value ", target_available_cash
             order_value(stock, target_available_cash)
